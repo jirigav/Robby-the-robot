@@ -1,34 +1,31 @@
-from random import randint
+from random import randint, random, sample
 
 number_of_genes = 243
 max_mutations = 6
-population_size = 10
+tournament_sample = 25
+population_size = 200
+rounds = 100
+mutation_probability = 0.2
 
 
-# initialise the GA
-#ga = pyeasyga.GeneticAlgorithm(data,
- #                           population_size=200,
-  #                          generations=100,
-   #                         crossover_probability=0.8,
-    #                        mutation_probability=0.2,
-     #                       elitism=True,
-      #                      maximise_fitness=False)
 
-
-def create_individual():
+def create_strategy():
     individual = [randint(0, 6) for _ in range(number_of_genes)] # random action for every situation
     return individual
 
-
+def new_individual(): # streatgy + fitness
+	individual = create_strategy()
+	score = fitness(individual)
+	return individual, score
 
 def crossover(parent_1, parent_2):
     crossover_index = randint(1, number_of_genes)
     child_1a = parent_1[:crossover_index]
-    child_1b = [i for i in parent_2 if i not in child_1a]
+    child_1b = parent_2[crossover_index:]
     child_1 = child_1a + child_1b
 
     child_2a = parent_2[crossover_index:]
-    child_2b = [i for i in parent_1 if i not in child_2a]
+    child_2b = parent_1[:crossover_index]
     child_2 = child_2a + child_2b
 
     return child_1, child_2
@@ -47,7 +44,7 @@ def generate_plan():
     return [[randint(0, 1) for _ in range(10)] for _ in range(10)] 
 
 def site_state(coordinates, plan):
-    if 10 > coordinates[0] >= 1 and 10 > coordinates[1] >= 0:
+    if 10 > coordinates[0] >= 0 and 10 > coordinates[1] >= 0:
         return plan[coordinates[0]][coordinates[1]]
 
     return 2 # wall
@@ -97,8 +94,9 @@ def move(plan, position, strategy):
         return 0
 
     if action == 5: # Robby picks can
+
         if current == 1:
-            plan[coordinates[0]][coordinates[1]] = 0
+            plan[position[0]][position[1]] = 0
             return 10
         return -1 # no can
 
@@ -107,22 +105,52 @@ def move(plan, position, strategy):
 
 
 
-def fitness (individual):
+def fitness (strategy):
     score = 0
 
     for i in range(10):
         plan = generate_plan()
         position = [0, 0]
         for i in range(200):
-            score += move(plan, position, individual)
-    return score/200
+            score += move(plan, position, strategy)
+    return score/10
+
+
+def tournament_selection(population):
+	options = sample(population, tournament_sample)
+	options.sort(key=lambda x: x[1], reverse=True)
+	return options[0], options[1]
+
+def new_population(population):
+	population.sort(key=lambda x: x[1], reverse=True)
+	print(population[0][1])
+	new_population = []
+
+	while (population_size > len(new_population)):
+		parent1, parent2 = tournament_selection(population)
+		child1, child2 = crossover(parent1[0], parent2[0])
+
+		if random() < mutation_probability:
+			mutate(child1)
+
+		if random() < mutation_probability:
+			mutate(child2)
+		new_population.append((child1, fitness(child1)))
+		new_population.append((child2, fitness(child2)))
+
+	return new_population
 
 
 def run():
-	population = [create_individual() for _ in range(population_size)]
-	score = [(fitness(population[i]), population[i]) for i in range(population_size)]
-	sorted(score, key=lambda x: x[0])
-	print(score[0])
+    population = [new_individual() for _ in range(population_size)]
+    population.sort(key=lambda x: x[1], reverse=True)
+    print(generate_plan())
+    print([population[i][1] for i in range(population_size)])
+    for _ in range(rounds):
+        population = new_population(population)
+    population.sort(key=lambda x: x[1], reverse=True)
+    print(population[0])
+    print(generate_plan())
 
 run()
 
