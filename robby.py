@@ -4,16 +4,23 @@ import time
 from copy import deepcopy
 
 number_of_genes = 243
+
+mutation_probability = 0.1
 max_mutations = 10
-tournament_sample = 25
+
 population_size = 200
+
+# number of top strategies left without change
 take_top = 0
 number_of_generations = 1000
-mutation_probability = 0.1
-number_of_actions = 100
-number_of_plans = 10
+number_of_actions = 200
+number_of_plans = 100
 
+# roulette selection probability 
 prob = [ 17/i for i in range(1, 201)]
+
+#tournament selection sample size
+tournament_sample = 25
 
 def create_strategy():
     individual = [randint(0, 6) for _ in range(number_of_genes)] # random action for every situation
@@ -200,11 +207,12 @@ def run():
         population.sort(key=lambda x: x[1], reverse=True)
         best = population[0][1]
         median = population[population_size//2][1]
-        print(best, median)
+        print("generation:", i, "best fitness:", best, "median fitness:", median)
         x1.append(best)
         x2.append(median)
         population = new_population(population)
 
+    print("--- %s seconds ---" % (time.time() - start_time))
     y = [x for x in range(number_of_generations)]
     plt.plot(y, x1, label = "max")
     #plt.plot(y, x2, label = "median")
@@ -213,7 +221,7 @@ def run():
     population.sort(key=lambda x: x[1], reverse=True)
     print(population[0])
     show_strategy(generate_plan(), population[0][0])
-    print("--- %s seconds ---" % (time.time() - start_time))
+    
 
 
 if __name__ == "__main__":
