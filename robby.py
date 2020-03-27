@@ -1,19 +1,19 @@
-from random import randint, random, sample
+from random import randint, random, sample, choices
 import matplotlib.pyplot as plt # pip install matplotlib
 import time
 from copy import deepcopy
 
 number_of_genes = 243
-max_mutations = 20
-tournament_sample = 15
+max_mutations = 10
+tournament_sample = 25
 population_size = 200
-take_top = 5
-number_of_generations = 300
-mutation_probability = 0.2
+take_top = 0
+number_of_generations = 1000
+mutation_probability = 0.1
 number_of_actions = 100
-number_of_plans = 20
+number_of_plans = 10
 
-
+prob = [ 17/i for i in range(1, 201)]
 
 def create_strategy():
     individual = [randint(0, 6) for _ in range(number_of_genes)] # random action for every situation
@@ -58,9 +58,9 @@ def site_state(coordinates, plan):
 
 def move(plan, position, strategy):
     up = site_state((position[0] - 1, position[1]), plan)
-    down = site_state((position[0] - 1, position[1]), plan)
-    right = site_state((position[0], position[1] - 1), plan)
-    left = site_state((position[0], position[1] + 1), plan)
+    down = site_state((position[0] + 1, position[1]), plan)
+    right = site_state((position[0], position[1] + 1), plan)
+    left = site_state((position[0], position[1] - 1), plan)
     current = site_state((position[0], position[1]), plan)
     gene_index = up * 81 + down * 27 +  right * 9 + left * 3 + current
     action = strategy[gene_index]
@@ -87,14 +87,14 @@ def move(plan, position, strategy):
         if right == 2: # wall
             return -5, (not random_action)
 
-        position[1] -= 1
+        position[1] += 1
         return 0, False
 
     if action == 3: # Robby goes left
         if left == 2: # wall
             return -5, (not random_action)
 
-        position[1] += 1
+        position[1] -= 1
         return 0, False
 
     if action == 5: # Robby picks can
@@ -133,8 +133,13 @@ def tournament_selection(population):
 	options.sort(key=lambda x: x[1], reverse=True)
 	return options[0]
 
+def roulette_selection(population):
+	choice = choices(population, weights=prob, k=2)
+	return choice[0], choice[1]
+
 def selection(population):
-	return tournament_selection(population), tournament_selection(population)
+	#return tournament_selection(population), tournament_selection(population)
+	return roulette_selection(population)
 
 def new_population(population):
 	
@@ -195,7 +200,7 @@ def run():
         population.sort(key=lambda x: x[1], reverse=True)
         best = population[0][1]
         median = population[population_size//2][1]
-        print(best)
+        print(best, median)
         x1.append(best)
         x2.append(median)
         population = new_population(population)
