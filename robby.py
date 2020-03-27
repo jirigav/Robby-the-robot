@@ -123,7 +123,7 @@ def fitness (strategy):
 
     for i in range(number_of_plans):
         plan = generate_plan()
-        position = choice([0, 0], [0, 9], [9, 0], [9, 9])
+        position = choice([[0, 0], [0, 9], [9, 0], [9, 9]])
         for i in range(number_of_actions):
             round_score, stucked = move(plan, position, strategy)
             score += round_score
