@@ -145,8 +145,8 @@ def roulette_selection(population):
 	return choice[0], choice[1]
 
 def selection(population):
-	#return tournament_selection(population), tournament_selection(population)
-	return roulette_selection(population)
+	return tournament_selection(population), tournament_selection(population)
+	#return roulette_selection(population)
 
 def new_population(population):
 	
