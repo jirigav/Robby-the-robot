@@ -5,10 +5,10 @@ from copy import deepcopy
 
 number_of_genes = 243
 
-mutation_probability = 0.1
-max_mutations = 10
+mutation_probability = 0.2
+max_mutations = 5
 
-population_size = 200
+population_size = 400
 
 # number of top strategies left without change
 take_top = 0
@@ -64,41 +64,41 @@ def site_state(coordinates, plan):
     return 2 # wall
 
 def move(plan, position, strategy):
-    up = site_state((position[0] - 1, position[1]), plan)
-    down = site_state((position[0] + 1, position[1]), plan)
-    right = site_state((position[0], position[1] + 1), plan)
-    left = site_state((position[0], position[1] - 1), plan)
+    north = site_state((position[0] - 1, position[1]), plan)
+    south = site_state((position[0] + 1, position[1]), plan)
+    east = site_state((position[0], position[1] + 1), plan)
+    west = site_state((position[0], position[1] - 1), plan)
     current = site_state((position[0], position[1]), plan)
-    gene_index = up * 81 + down * 27 +  right * 9 + left * 3 + current
+    gene_index = north * 81 + south * 27 +  east * 9 + west * 3 + current
     action = strategy[gene_index]
-    random_action = False
+    random_action = False 
     if action == 6: # Robby moves randomly 
         action = randint(0, 3)
         random_action = True
 
-    if action == 0:  # Robby goes up
-        if up == 2: # wall
+    if action == 0:  # Robby goes north
+        if north == 2: # wall
             return -5, (not random_action)
 
         position[0] -= 1
         return 0, False
 
-    if action == 1: # Robby goes down
-        if down == 2: # wall
+    if action == 1: # Robby goes south
+        if south == 2: # wall
             return -5, (not random_action)
 
         position[0] += 1
         return 0, False
 
-    if action == 2: # Robby goes right
-        if right == 2: # wall
+    if action == 2: # Robby goes east
+        if east == 2: # wall
             return -5, (not random_action)
 
         position[1] += 1
         return 0, False
 
-    if action == 3: # Robby goes left
-        if left == 2: # wall
+    if action == 3: # Robby goes west
+        if west == 2: # wall
             return -5, (not random_action)
 
         position[1] -= 1
@@ -128,7 +128,7 @@ def fitness (strategy):
             round_score, stucked = move(plan, position, strategy)
             score += round_score
             if stucked:
-            	score += (number_of_actions - i - 1)*round_score
+            	score += (number_of_actions - i - 1)*round_score #skip repetitive actions
             	break
 
 
@@ -155,9 +155,9 @@ def new_population(population):
 
     while (population_size > len(new_population)):
         start_time = time.time()
-        parent1, parent2 = selection(population)
+        parent1, parent2 = selection(population) # choose parents
 
-        child1, child2 = crossover(parent1[0], parent2[0])
+        child1, child2 = crossover(parent1[0], parent2[0]) 
 
         if random() < mutation_probability:
             mutate(child1)
@@ -200,7 +200,7 @@ def show_strategy(plan, strategy):
 
 def run():
     start_time = time.time()
-    population = [new_individual() for _ in range(population_size)]
+    population = [new_individual() for _ in range(population_size)] # first population
     x1 = []
     x2 = []
     for i in range(number_of_generations):
