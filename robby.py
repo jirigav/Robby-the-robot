@@ -3,21 +3,21 @@ import matplotlib.pyplot as plt # pip install matplotlib
 import time
 from copy import deepcopy
 
-number_of_genes = 243
+number_of_genes = 3125
 
 mutation_probability = 0.2
 number_of_mutations = 3
 
-population_size = 400
+population_size = 100
 
 # number of top strategies left without change
 take_top = 0
-number_of_generations = 1000
-number_of_actions = 200
-number_of_plans = 100
+number_of_generations = 100
+number_of_actions = 100
+number_of_plans = 10
 
 
-selection = tournament_selection
+
 # roulette selection probability 
 prob = [ 17/i for i in range(1, 201)]
 
@@ -34,7 +34,7 @@ def new_individual(): # streatgy + fitness
 	return individual, score
 
 def crossover(parent1, parent2):
-    crossover_index = randint(1, number_of_genes)
+    crossover_index = randint(0, number_of_genes - 1)
     child1a = parent1[:crossover_index]
     child1b = parent2[crossover_index:]
     child1 = child1a + child1b
@@ -55,9 +55,18 @@ def mutate(individual):
 
 # generates plan with random cans 
 def generate_plan():
-    return [[randint(0, 1) for _ in range(10)] for _ in range(10)] 
+    plan = [[randint(0, 1) for _ in range(10)] for _ in range(10)] 
+    for _ in range(5): #walls
+    	plan[randint(0, 9)][randint(0, 9)] = 2
+   
+    plan[randint(0, 9)][randint(0, 9)] = 3
+    plan[randint(0, 9)][randint(0, 9)] = 3
+    plan[randint(0, 9)][randint(0, 9)] = 4
+    plan[randint(0, 9)][randint(0, 9)] = 4
 
-# returns 2 if wall, 1 if can, 0 otherwise 
+    return plan
+
+# returns 2 if wall, 1 if can, 3 if hole, 4 if teleport, 0 otherwise 
 def site_state(coordinates, plan):
     if 10 > coordinates[0] >= 0 and 10 > coordinates[1] >= 0:
         return plan[coordinates[0]][coordinates[1]]
@@ -70,7 +79,7 @@ def move(plan, position, strategy):
     east = site_state((position[0], position[1] + 1), plan)
     west = site_state((position[0], position[1] - 1), plan)
     current = site_state((position[0], position[1]), plan)
-    gene_index = north * 81 + south * 27 +  east * 9 + west * 3 + current
+    gene_index = north * 625 + south * 125 +  east * 25 + west * 5 + current
     action = strategy[gene_index]
     random_action = False 
     if action == 6: # Robby moves randomly 
@@ -117,7 +126,10 @@ def move(plan, position, strategy):
     	
 
 
-
+def teleport(position, plan):
+	while site_state(position, plan) == 4 or site_state(position, plan) == 2:
+		position = (randint(0, 9), randint(0, 9))
+	
 
 def fitness (strategy):
     score = 0
@@ -128,6 +140,13 @@ def fitness (strategy):
         for i in range(number_of_actions):
             round_score, stucked = move(plan, position, strategy)
             score += round_score
+
+            if site_state(position, plan) == 4: # teleport
+            	teleport(position, plan)
+
+            if site_state(position, plan) == 3: # Robby is in a hole
+            	break
+
             if stucked:
             	score += (number_of_actions - i - 1)*round_score #skip repetitive actions
             	break
@@ -144,6 +163,8 @@ def tournament_selection(population):
 def roulette_selection(population):
 	choice = choices(population, weights=prob, k=2)
 	return choice[0], choice[1]
+
+selection = tournament_selection
 
 def new_population(population):
 	
@@ -169,19 +190,25 @@ def new_population(population):
     return new_population
 
 def print_plan(plan, position):
-	print("____________")
+	print("⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
 	for i in range(10):
-		print("|", end="")
+		print("⬛", end="")
 		for j in range(10):
-			if i == position[0] and j == position[1]:
-				print("O", end="")
+			if i == position[0] and j == position[1]: # robot
+				print("🤖", end="")
 			else:
-			    if plan[i][j] == 0:
-				    print(" ", end="")
-			    if plan[i][j] == 1:
-				    print("X", end="")
-		print("|")
-	print("____________")
+			    if plan[i][j] == 0: # empty
+				    print("⬜", end="")
+			    if plan[i][j] == 1: # can
+				    print("🥫", end="")
+			    if plan[i][j] == 2: # wall
+			        print("⬛", end="")
+			    if plan[i][j] == 3: # hole
+			        print("⚫", end="")
+			    if plan[i][j] == 4: # teleport
+			        print("🌀", end="")
+		print("⬛")
+	print("⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
 
 def show_strategy(plan, strategy):
 	position = [0, 0]
