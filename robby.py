@@ -6,7 +6,7 @@ from copy import deepcopy
 number_of_genes = 243
 
 mutation_probability = 0.2
-max_mutations = 5
+number_of_mutations = 3
 
 population_size = 400
 
@@ -16,11 +16,13 @@ number_of_generations = 1000
 number_of_actions = 200
 number_of_plans = 100
 
+
+selection = tournament_selection
 # roulette selection probability 
 prob = [ 17/i for i in range(1, 201)]
 
 #tournament selection sample size
-tournament_sample = 25
+tournament_sample = 50
 
 def create_strategy():
     individual = [randint(0, 6) for _ in range(number_of_genes)] # random action for every situation
@@ -46,7 +48,6 @@ def crossover(parent1, parent2):
 
 
 def mutate(individual):
-    number_of_mutations = randint(1, max_mutations) # choose random number of mutations
     for i in range(number_of_mutations):
         individual[randint(0, number_of_genes - 1)] = randint(0, 6) 
 
@@ -138,15 +139,11 @@ def fitness (strategy):
 def tournament_selection(population):
 	options = sample(population, tournament_sample)
 	options.sort(key=lambda x: x[1], reverse=True)
-	return options[0]
+	return options[0], options[1]
 
 def roulette_selection(population):
 	choice = choices(population, weights=prob, k=2)
 	return choice[0], choice[1]
-
-def selection(population):
-	#return tournament_selection(population), tournament_selection(population)
-	return roulette_selection(population)
 
 def new_population(population):
 	
@@ -207,7 +204,8 @@ def run():
         population.sort(key=lambda x: x[1], reverse=True)
         best = population[0][1]
         median = population[population_size//2][1]
-        print("generation:", i, "best fitness:", best, "median fitness:", median)
+        worst = population[-1][1]
+        print("generation:", i, "best fitness:", best, "median fitness:", median, "worst:", worst)
         x1.append(best)
         x2.append(median)
         population = new_population(population)
@@ -220,6 +218,11 @@ def run():
     plt.show()
     population.sort(key=lambda x: x[1], reverse=True)
     print(population[0])
+    print("mutation_probability:", mutation_probability)
+    print("number_of_mutations:", number_of_mutations)
+    print("population_size", population_size)
+    print("number_of_actions:", number_of_actions)
+    print("tournament_sample:", tournament_sample)
     show_strategy(generate_plan(), population[0][0])
     
 
