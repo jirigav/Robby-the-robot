@@ -1,18 +1,15 @@
 from random import randint, random, sample, choices, choice
 import matplotlib.pyplot as plt # pip install matplotlib
 import time
-from copy import deepcopy
 
-number_of_genes = 3125
+number_of_genes = 1250
 
 mutation_probability = 0.2
 number_of_mutations = 3
 
-population_size = 100
+population_size = 1000
 
-# number of top strategies left without change
-take_top = 0
-number_of_generations = 100
+number_of_generations = 500
 number_of_actions = 100
 number_of_plans = 10
 
@@ -56,8 +53,13 @@ def mutate(individual):
 # generates plan with random cans 
 def generate_plan():
     plan = [[randint(0, 1) for _ in range(10)] for _ in range(10)] 
-    for _ in range(5): #walls
-    	plan[randint(0, 9)][randint(0, 9)] = 2
+    i = 0
+    while i < 5: #walls
+        coordinates = (randint(0, 9), randint(0, 9))
+        if coordinates in {(0, 0), (0, 9), (9, 0), (9, 9)}:
+            continue
+        plan[coordinates[0]][coordinates[1]] = 2
+        i += 1
    
     plan[randint(0, 9)][randint(0, 9)] = 3
     plan[randint(0, 9)][randint(0, 9)] = 3
@@ -79,7 +81,7 @@ def move(plan, position, strategy):
     east = site_state((position[0], position[1] + 1), plan)
     west = site_state((position[0], position[1] - 1), plan)
     current = site_state((position[0], position[1]), plan)
-    gene_index = north * 625 + south * 125 +  east * 25 + west * 5 + current
+    gene_index = current * 625 + north * 125 +  south * 25 + east * 5 + west
     action = strategy[gene_index]
     random_action = False 
     if action == 6: # Robby moves randomly 
@@ -128,7 +130,8 @@ def move(plan, position, strategy):
 
 def teleport(position, plan):
 	while site_state(position, plan) == 4 or site_state(position, plan) == 2:
-		position = (randint(0, 9), randint(0, 9))
+		position[0] = randint(0, 9)
+		position[1] = randint(0, 9)
 	
 
 def fitness (strategy):
@@ -138,14 +141,16 @@ def fitness (strategy):
         plan = generate_plan()
         position = choice([[0, 0], [0, 9], [9, 0], [9, 9]])
         for i in range(number_of_actions):
+        	
+            if site_state(position, plan) == 4: # teleport
+                teleport(position, plan)
+
+            if site_state(position, plan) == 3: # Robby is in a hole
+                break
+
             round_score, stucked = move(plan, position, strategy)
             score += round_score
 
-            if site_state(position, plan) == 4: # teleport
-            	teleport(position, plan)
-
-            if site_state(position, plan) == 3: # Robby is in a hole
-            	break
 
             if stucked:
             	score += (number_of_actions - i - 1)*round_score #skip repetitive actions
@@ -169,10 +174,10 @@ selection = tournament_selection
 def new_population(population):
 	
 
-    new_population = deepcopy(population[0:take_top])
+    new_population = []
 
     while (population_size > len(new_population)):
-        start_time = time.time()
+        
         parent1, parent2 = selection(population) # choose parents
 
         child1, child2 = crossover(parent1[0], parent2[0]) 
