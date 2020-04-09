@@ -17,7 +17,6 @@ number_of_actions = 200
 number_of_plans = 100
 
 
-selection = tournament_selection
 # roulette selection probability 
 prob = [ 17/i for i in range(1, 201)]
 
@@ -145,13 +144,10 @@ def roulette_selection(population):
 	choice = choices(population, weights=prob, k=2)
 	return choice[0], choice[1]
 
-<<<<<<< HEAD
-=======
-def selection(population):
-	return tournament_selection(population), tournament_selection(population)
-	#return roulette_selection(population)
 
->>>>>>> 92d24e7db7a78af6e319a744fa1a01cf1b464674
+selection=tournament_selection
+
+
 def new_population(population):
 	
 
@@ -176,21 +172,22 @@ def new_population(population):
     return new_population
 
 def print_plan(plan, position):
-	print("____________")
+	print("⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
 	for i in range(10):
-		print("|", end="")
+		print("⬛", end="")
 		for j in range(10):
-			if i == position[0] and j == position[1]:
-				print("O", end="")
+			if i == position[0] and j == position[1]: # robot
+				print("🤖", end="")
 			else:
-			    if plan[i][j] == 0:
-				    print(" ", end="")
-			    if plan[i][j] == 1:
-				    print("X", end="")
-		print("|")
-	print("____________")
+			    if plan[i][j] == 0: # empty
+				    print("⬜", end="")
+			    if plan[i][j] == 1: # can
+				    print("🥫", end="")
+		print("⬛")
+	print("⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
 
 def show_strategy(plan, strategy):
+	score = 0
 	position = [0, 0]
 	action = 0
 	while 1:
@@ -199,7 +196,9 @@ def show_strategy(plan, strategy):
 		if "q" == input("q - exit"):
 			break
 		action += 1
-		move(plan, position, strategy)
+		sc, _ = move(plan, position, strategy)
+		score += sc
+		print("score:"score)
 
 
 def run():
