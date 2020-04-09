@@ -145,6 +145,13 @@ def roulette_selection(population):
 	choice = choices(population, weights=prob, k=2)
 	return choice[0], choice[1]
 
+<<<<<<< HEAD
+=======
+def selection(population):
+	return tournament_selection(population), tournament_selection(population)
+	#return roulette_selection(population)
+
+>>>>>>> 92d24e7db7a78af6e319a744fa1a01cf1b464674
 def new_population(population):
 	
 
