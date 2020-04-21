@@ -231,7 +231,7 @@ def show_strategy(plan, strategy):
 		action += 1
 		sc, _ = move(plan, position, strategy)
 		score += sc
-		print("score:"score)
+		print("score:", score)
 
 
 def run():
