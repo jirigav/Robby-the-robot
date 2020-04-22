@@ -220,18 +220,24 @@ def print_plan(plan, position):
 	print("⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
 
 def show_strategy(plan, strategy):
-	score = 0
-	position = [0, 0]
-	action = 0
-	while 1:
-		print("action", action)
-		print_plan(plan, position)
-		if "q" == input("q - exit"):
-			break
-		action += 1
-		sc, _ = move(plan, position, strategy)
-		score += sc
-		print("score:"score)
+    score = 0
+    position = [0, 0]
+    action = 0
+    while 1:
+        print("action", action)
+        print_plan(plan, position)
+        if "q" == input("q - exit"):
+            break
+        action += 1
+        
+        if site_state(position, plan) == 4:
+            teleport(position, plan)
+        if site_state(position, plan) == 3:
+            print("Robby can't move.")
+            break
+        sc, _ = move(plan, position, strategy)
+        score += sc
+        print("score:", score)
 
 
 def run():
@@ -267,5 +273,4 @@ def run():
 
 
 if __name__ == "__main__":
-	run()
-
+    run()
