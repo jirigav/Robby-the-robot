@@ -1,10 +1,10 @@
 from random import randint
 from itertools import product
 
-from robby import create_strategy, generate_plan, move
+from robby import generate_plan, move, create_strategy, site_state, teleport
 
-NUMBER_OF_GENES = 1250
-NUMBER_OF_STATES = 5
+NUMBER_OF_GENES = 512
+NUMBER_OF_STATES = 4
 NUMBER_OF_ACTIONS = 100
 BOARD_SIZE = 10
 
@@ -23,19 +23,17 @@ ACTIONS = [NORTH, SOUTH, EAST, WEST, STAY, PICK_UP, RANDOM]
 EMPTY = 0
 CAN = 1
 WALL = 2
-PIT = 3
-TELEPORT = 4
+TELEPORT = 3
 
 # CHARACTERS
 CHARACTERS = {
     EMPTY: " ",
     CAN: "X",
     WALL: "|",
-    PIT: "O",
     TELEPORT: "T"
 }
 
-STATES = [EMPTY, CAN, WALL, PIT, TELEPORT]
+STATES = [EMPTY, CAN, WALL, TELEPORT]
 
 def get_gene_index(current, north, south, east, west):
     return current * NUMBER_OF_STATES ** 4 + \
@@ -59,21 +57,26 @@ def print_plan(plan, position):
 def show_strategy(plan, strategy):
     score = 0
     position = [0, 0]
-    print(len(strategy))
-    for step in range(NUMBER_OF_ACTIONS):
-        print("Action: ", step)
+    action = 0
+    while 1:
+        print("action", action)
         print_plan(plan, position)
-        actual_score, _ = move(plan, position, strategy)
-        score += actual_score
-        print("Score: ", score)
+        if "q" == input("q - exit"):
+            break
+        action += 1
+        
+        if site_state(position, plan) == 3:
+            teleport(position, plan)
+
+        sc, _ = move(plan, position, strategy)
+        score += sc
+        print("score:", score)
 
 '''
 Following naive strategy, Robby:
 - picks up a can if he is currently on a position containing one
 - moves to the position containing a can if his current position 
 is empty and there is such neighbour position
-- prefers going to an empty position before anything except a cell
-with a can
 - otherwise acts randomly
 '''
 def create_naive_strategy():
@@ -89,8 +92,7 @@ def create_naive_strategy():
 
     '''
     For the rule two and three, current site is automatically empty,
-    as Robby cannot stand on a wall or teleport and if he stands inside
-    a pit, he cannot move for the rest of the session.
+    as Robby cannot stand on a wall or teleport.
     '''
 
     # RULE TWO: If there is a can in neighbourhood
@@ -107,26 +109,18 @@ def create_naive_strategy():
         naive_individual[get_gene_index(EMPTY, first, second, third, CAN)] = WEST
 
 
-    # RULE THREE: Avoiding walls, pits and teleports if there
-    # is an empty neighbour
-
-    '''
-    If there are several empty neighbour sites, we just define
-    one of them.
-    '''
-    
-    options = [EMPTY, WALL, TELEPORT, PIT]
+    options = [EMPTY, WALL, TELEPORT]
 
     for situation in product(options, repeat=3):
         first, second, third = situation
 
-        naive_individual[get_gene_index(EMPTY, EMPTY, first, second, third)] = NORTH
-        naive_individual[get_gene_index(EMPTY, first, second, EMPTY, third)] = EAST
-        naive_individual[get_gene_index(EMPTY, first, second, third, EMPTY)] = WEST
-        naive_individual[get_gene_index(EMPTY, first, EMPTY, second, third)] = SOUTH
+        naive_individual[get_gene_index(EMPTY, EMPTY, first, second, third)] = RANDOM
+        naive_individual[get_gene_index(EMPTY, first, second, EMPTY, third)] = RANDOM
+        naive_individual[get_gene_index(EMPTY, first, second, third, EMPTY)] = RANDOM
+        naive_individual[get_gene_index(EMPTY, first, EMPTY, second, third)] = RANDOM
     
     return naive_individual
 
-
 if __name__ == '__main__':
-    show_strategy(generate_plan(), create_naive_strategy())
+    naive_individual = create_naive_strategy()
+    show_strategy(generate_plan(), naive_individual)
