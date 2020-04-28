@@ -2,16 +2,16 @@ from random import randint, random, sample, choices, choice
 import matplotlib.pyplot as plt # pip install matplotlib
 import time
 
-number_of_genes = 1250
+number_of_genes = 512
 
-mutation_probability = 0.2
-number_of_mutations = 3
+mutation_probability = 0.4
+number_of_mutations = 5
 
-population_size = 1000
+population_size = 600
 
 number_of_generations = 500
 number_of_actions = 200
-number_of_plans = 1000
+number_of_plans = 50
 
 
 
@@ -60,12 +60,10 @@ def generate_plan():
    
     plan[randint(0, 9)][randint(0, 9)] = 3
     plan[randint(0, 9)][randint(0, 9)] = 3
-    plan[randint(0, 9)][randint(0, 9)] = 4
-    plan[randint(0, 9)][randint(0, 9)] = 4
 
     return plan
 
-# returns 2 if wall, 1 if can, 3 if hole, 4 if teleport, 0 otherwise 
+# returns 2 if wall, 1 if can, 3 if teleport, 0 otherwise 
 def site_state(coordinates, plan):
     if 10 > coordinates[0] >= 0 and 10 > coordinates[1] >= 0:
         return plan[coordinates[0]][coordinates[1]]
@@ -78,7 +76,7 @@ def move(plan, position, strategy):
     east = site_state((position[0], position[1] + 1), plan)
     west = site_state((position[0], position[1] - 1), plan)
     current = site_state((position[0], position[1]), plan)
-    gene_index = current * 625 + north * 125 +  south * 25 + east * 5 + west
+    gene_index = current * 256 + north * 64 +  south * 16 + east * 4 + west
     action = strategy[gene_index]
     random_action = False 
     if action == 6: # Robby moves randomly 
@@ -126,7 +124,7 @@ def move(plan, position, strategy):
 
 
 def teleport(position, plan):
-	while site_state(position, plan) == 4 or site_state(position, plan) == 2:
+	while site_state(position, plan) == 3 or site_state(position, plan) == 2:
 		position[0] = randint(0, 9)
 		position[1] = randint(0, 9)
 	
@@ -139,11 +137,9 @@ def fitness (strategy):
         position = choice([[0, 0], [0, 9], [9, 0], [9, 9]])
         for i in range(number_of_actions):
         	
-            if site_state(position, plan) == 4: # teleport
+            if site_state(position, plan) == 3: # teleport
                 teleport(position, plan)
 
-            if site_state(position, plan) == 3: # Robby is in a hole
-                break
 
             round_score, stucked = move(plan, position, strategy)
             score += round_score
@@ -201,9 +197,7 @@ def print_plan(plan, position):
 				    print("🥫", end="")
 			    if plan[i][j] == 2: # wall
 			        print("⬛", end="")
-			    if plan[i][j] == 3: # hole
-			        print("⚫", end="")
-			    if plan[i][j] == 4: # teleport
+			    if plan[i][j] == 3: # teleport
 			        print("🌀", end="")
 		print("⬛")
 	print("⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
@@ -219,11 +213,9 @@ def show_strategy(plan, strategy):
             break
         action += 1
         
-        if site_state(position, plan) == 4:
-            teleport(position, plan)
         if site_state(position, plan) == 3:
-            print("Robby can't move.")
-            break
+            teleport(position, plan)
+
         sc, _ = move(plan, position, strategy)
         score += sc
         print("score:", score)
