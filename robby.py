@@ -10,13 +10,10 @@ number_of_mutations = 3
 population_size = 1000
 
 number_of_generations = 500
-number_of_actions = 100
-number_of_plans = 10
+number_of_actions = 200
+number_of_plans = 1000
 
 
-
-# roulette selection probability 
-prob = [ 17/i for i in range(1, 201)]
 
 #tournament selection sample size
 tournament_sample = 50
@@ -32,8 +29,8 @@ def new_individual(): # streatgy + fitness
 
 def crossover(parent1, parent2):
     crossover_index = randint(0, number_of_genes - 1)
-    child1a = parent1[:crossover_index]
-    child1b = parent2[crossover_index:]
+    child1a = parent1[crossover_index:]
+    child1b = parent2[:crossover_index]
     child1 = child1a + child1b
 
     child2a = parent2[crossover_index:]
@@ -165,14 +162,6 @@ def tournament_selection(population):
 	options.sort(key=lambda x: x[1], reverse=True)
 	return options[0], options[1]
 
-def roulette_selection(population):
-	choice = choices(population, weights=prob, k=2)
-	return choice[0], choice[1]
-
-
-
-selection = tournament_selection
-
 
 
 def new_population(population):
@@ -182,7 +171,7 @@ def new_population(population):
 
     while (population_size > len(new_population)):
         
-        parent1, parent2 = selection(population) # choose parents
+        parent1, parent2 = tournament_selection(population) # choose parents
 
         child1, child2 = crossover(parent1[0], parent2[0]) 
 
