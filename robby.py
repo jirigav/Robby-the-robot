@@ -29,12 +29,12 @@ def new_individual(): # streatgy + fitness
 
 def crossover(parent1, parent2):
     crossover_index = randint(0, number_of_genes - 1)
-    child1a = parent1[crossover_index:]
-    child1b = parent2[:crossover_index]
+    child1a = parent1[:crossover_index]
+    child1b = parent2[crossover_index:]
     child1 = child1a + child1b
 
-    child2a = parent2[crossover_index:]
-    child2b = parent1[:crossover_index]
+    child2a = parent2[:crossover_index]
+    child2b = parent1[crossover_index:]
     child2 = child2a + child2b
 
     return child1, child2
