@@ -53,10 +53,17 @@ def distribute_cans_to_clusters():
         # "cluster center"
         c1, c2 = (randint(1, 8), randint(1, 8))
 
-        # Moore neighbourhood
-        for row in range(c1 - 1, c1 + 2):
-            for col in range(c2 - 1, c2 + 2):
-                plan[row][col] = 1
+        # Moore's neighbourhood
+        # for row in range(c1 - 1, c1 + 2):
+        #     for col in range(c2 - 1, c2 + 2):
+        #         plan[row][col] = 1
+
+        # von Neumann's neighbourhood
+        plan[c1][c2] = 1
+        plan[c1 - 1][c2] = 1
+        plan[c1 + 1][c2] = 1
+        plan[c1][c2 - 1] = 1
+        plan[c1][c2 + 1] = 1
 
     return plan
         
