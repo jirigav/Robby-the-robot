@@ -42,14 +42,34 @@ def crossover(parent1, parent2):
 
 
 def mutate(individual):
-    for i in range(number_of_mutations):
+    for _ in range(number_of_mutations):
         individual[randint(0, number_of_genes - 1)] = randint(0, 6) 
 
+def distribute_cans_to_clusters():
+    plan = [[0 for _ in range(10)] for _ in range(10)]
 
+    # create four clusters
+    for _ in range(4):
+        # "cluster center"
+        c1, c2 = (randint(1, 8), randint(1, 8))
+
+        # Moore neighbourhood
+        for row in range(c1 - 1, c1 + 2):
+            for col in range(c2 - 1, c2 + 2):
+                plan[row][col] = 1
+
+    return plan
+        
+
+def distribute_cans_randomly():
+    return [[randint(0, 1) for _ in range(10)] for _ in range(10)] 
+
+# create_plan_with_cans = distribute_cans_randomly()
+create_plan_with_cans = distribute_cans_to_clusters()
 
 # generates plan with random cans 
 def generate_plan():
-    plan = [[randint(0, 1) for _ in range(10)] for _ in range(10)] 
+    plan = create_plan_with_cans 
     i = 0
     while i < 5: #walls
         coordinates = (randint(0, 9), randint(0, 9))
