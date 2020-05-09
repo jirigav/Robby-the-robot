@@ -49,21 +49,19 @@ def distribute_cans_to_clusters():
     plan = [[0 for _ in range(10)] for _ in range(10)]
 
     # create four clusters
-    for _ in range(4):
-        # "cluster center"
-        c1, c2 = (randint(1, 8), randint(1, 8))
+    for i in range(2):
+        shift_col = i * 5
+        for j in range(2):
+            shift_row = j * 5
+            # "cluster center"
+            c1, c2 = (randint(1 + shift_row, 3 + shift_row), randint(1 + shift_col, 3 + shift_col))
 
-        # Moore's neighbourhood
-        # for row in range(c1 - 1, c1 + 2):
-        #     for col in range(c2 - 1, c2 + 2):
-        #         plan[row][col] = 1
-
-        # von Neumann's neighbourhood
-        plan[c1][c2] = 1
-        plan[c1 - 1][c2] = 1
-        plan[c1 + 1][c2] = 1
-        plan[c1][c2 - 1] = 1
-        plan[c1][c2 + 1] = 1
+            # von Neumann's neighbourhood
+            plan[c1][c2] = 1
+            plan[c1 - 1][c2] = 1
+            plan[c1 + 1][c2] = 1
+            plan[c1][c2 - 1] = 1
+            plan[c1][c2 + 1] = 1
 
     return plan
         
