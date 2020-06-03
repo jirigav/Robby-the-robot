@@ -121,6 +121,44 @@ def create_naive_strategy():
     
     return naive_individual
 
-if __name__ == '__main__':
+
+'''
+Following this naive strategy, Robby will keep the naive behaviour except:
+- he will prefer teleport if there is no can in neighbourhood
+'''
+def create_naive_strategy_prefering_teleports():
     naive_individual = create_naive_strategy()
+
+    # RULE THREE: If there is not a can nearby, prefer teleport is there is one
+    options = [EMPTY, WALL, TELEPORT]
+
+    for situation in product(options, repeat=3):
+        first, second, third = situation
+
+        naive_individual[get_gene_index(EMPTY, TELEPORT, first, second, third)] = NORTH
+        naive_individual[get_gene_index(EMPTY, first, TELEPORT, second, third)] = SOUTH
+        naive_individual[get_gene_index(EMPTY, first, second, TELEPORT, third)] = EAST
+        naive_individual[get_gene_index(EMPTY, first, second, third, TELEPORT)] = WEST
+
+    return naive_individual
+
+'''
+Following this strategy, Robby prefers teleports even if there is a can in neighbourhood.
+'''
+def create_naive_strategy_prefering_teleports_for_any_price():
+    naive_individual = create_naive_strategy()
+
+    # RULE FOUR: Prefer teleport
+    for situation in product(STATES, repeat=3):
+        first, second, third = situation
+
+        naive_individual[get_gene_index(EMPTY, TELEPORT, first, second, third)] = NORTH
+        naive_individual[get_gene_index(EMPTY, first, TELEPORT, second, third)] = SOUTH
+        naive_individual[get_gene_index(EMPTY, first, second, TELEPORT, third)] = EAST
+        naive_individual[get_gene_index(EMPTY, first, second, third, TELEPORT)] = WEST
+
+    return naive_individual
+
+if __name__ == '__main__':
+    naive_individual = create_naive_strategy_prefering_teleports_for_any_price()
     show_strategy(generate_plan(), naive_individual)
