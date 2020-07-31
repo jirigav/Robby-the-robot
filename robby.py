@@ -1,19 +1,24 @@
 from random import randint, random, sample, choices, choice
-import matplotlib.pyplot as plt # pip install matplotlib
-import time
 
 number_of_genes = 512
 
 mutation_probability = 0.4
+
+# number of mutated genes
 number_of_mutations = 5
 
-population_size = 600
+population_size = 200
 
-number_of_generations = 500
+number_of_generations = 1000
+
+# number of actions performed on a plan 
 number_of_actions = 200
-number_of_plans = 50
 
+number_of_plans = 100
+
+# probability of can to be placed on a certain spot
 can_probability = 0.5
+
 
 #tournament selection sample size
 tournament_sample = 50
@@ -72,11 +77,11 @@ def distribute_cans_randomly():
     return [[1 if random() > (1 - can_probability) else 0 for _ in range(10)] for _ in range(10)] 
 
 # create_plan_with_cans = distribute_cans_randomly()
-create_plan_with_cans = distribute_cans_to_clusters()
+create_plan_with_cans = distribute_cans_randomly
 
 
 def generate_plan():
-    plan = create_plan_with_cans 
+    plan = create_plan_with_cans() 
     i = 0
     while i < 5: #walls
         coordinates = (randint(0, 9), randint(0, 9))
@@ -249,34 +254,18 @@ def show_strategy(plan, strategy):
 
 
 def run():
-    start_time = time.time()
+
     population = [new_individual() for _ in range(population_size)] # first population
-    x1 = []
-    x2 = []
+
     for i in range(number_of_generations):
         population.sort(key=lambda x: x[1], reverse=True)
-        best = population[0][1]
-        median = population[population_size//2][1]
-        worst = population[-1][1]
-        print("generation:", i, "best fitness:", best, "median fitness:", median, "worst:", worst)
-        x1.append(best)
-        x2.append(median)
         population = new_population(population)
 
-    print("--- %s seconds ---" % (time.time() - start_time))
-    y = [x for x in range(number_of_generations)]
-    plt.plot(y, x1, label = "max")
-    #plt.plot(y, x2, label = "median")
-    plt.legend()
-    plt.show()
+
+
     population.sort(key=lambda x: x[1], reverse=True)
-    print(population[0])
-    print("mutation_probability:", mutation_probability)
-    print("number_of_mutations:", number_of_mutations)
-    print("population_size", population_size)
-    print("number_of_actions:", number_of_actions)
-    print("tournament_sample:", tournament_sample)
     show_strategy(generate_plan(), population[0][0])
+    return population
     
 
 
