@@ -1,19 +1,20 @@
 from random import randint, random, sample, choices, choice
-import matplotlib.pyplot as plt # pip install matplotlib
-import time
-from copy import deepcopy
 
 number_of_genes = 243
 
 mutation_probability = 0.2
+
+# number of mutated genes
 number_of_mutations = 3
 
 population_size = 400
 
-# number of top strategies left without change
-take_top = 0
+
 number_of_generations = 1000
+
+# number of actions performed on a plan 
 number_of_actions = 200
+
 number_of_plans = 100
 
 
@@ -33,13 +34,13 @@ def new_individual(): # streatgy + fitness
 	return individual, score
 
 def crossover(parent1, parent2):
-    crossover_index = randint(1, number_of_genes)
+    crossover_index = randint(0, number_of_genes - 1)
     child1a = parent1[:crossover_index]
     child1b = parent2[crossover_index:]
     child1 = child1a + child1b
 
-    child2a = parent2[crossover_index:]
-    child2b = parent1[:crossover_index]
+    child2a = parent2[:crossover_index]
+    child2b = parent1[crossover_index:]
     child2 = child2a + child2b
 
     return child1, child2
@@ -151,10 +152,10 @@ selection=tournament_selection
 def new_population(population):
 	
 
-    new_population = deepcopy(population[0:take_top])
+    new_population = []
 
     while (population_size > len(new_population)):
-        start_time = time.time()
+
         parent1, parent2 = selection(population) # choose parents
 
         child1, child2 = crossover(parent1[0], parent2[0]) 
@@ -198,39 +199,21 @@ def show_strategy(plan, strategy):
 		action += 1
 		sc, _ = move(plan, position, strategy)
 		score += sc
-		print("score:"score)
+		print("score:", score)
 
 
 def run():
-    start_time = time.time()
     population = [new_individual() for _ in range(population_size)] # first population
-    x1 = []
-    x2 = []
+
     for i in range(number_of_generations):
         population.sort(key=lambda x: x[1], reverse=True)
-        best = population[0][1]
-        median = population[population_size//2][1]
-        worst = population[-1][1]
-        print("generation:", i, "best fitness:", best, "median fitness:", median, "worst:", worst)
-        x1.append(best)
-        x2.append(median)
         population = new_population(population)
 
-    print("--- %s seconds ---" % (time.time() - start_time))
-    y = [x for x in range(number_of_generations)]
-    plt.plot(y, x1, label = "max")
-    #plt.plot(y, x2, label = "median")
-    plt.legend()
-    plt.show()
+    
     population.sort(key=lambda x: x[1], reverse=True)
-    print(population[0])
-    print("mutation_probability:", mutation_probability)
-    print("number_of_mutations:", number_of_mutations)
-    print("population_size", population_size)
-    print("number_of_actions:", number_of_actions)
-    print("tournament_sample:", tournament_sample)
     show_strategy(generate_plan(), population[0][0])
     
+    return population
 
 
 if __name__ == "__main__":
